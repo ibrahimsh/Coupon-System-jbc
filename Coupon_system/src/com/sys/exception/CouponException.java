@@ -76,20 +76,19 @@ public class CouponException extends Exception{
 				System.out.println(e.getMessage());
 				System.out.println("Coupon information is wrong try again");
 				break;
-		case DuplicateCouponTypeException :
-				System.out.println(e.getMessage());
-				System.out.println("can't purchase coupon - same coupon type already exist!");
-				break;
-		case UnAvailableCouponException :
-				System.out.println(e.getMessage());
-				System.out.println("can't purchase coupon - no more available coupons or coupon is expired");
-				break;
+		case CouponException :
+			System.out.println(e.getMessage());
+			System.out.println("proplem with createing or  updating or  delete coupon in database");
 		case NullConnectionException :
 				System.out.println(e.getMessage());
 				System.out.println("your connection is null - the system might be shutting down!");
 		case IllegalArgumentException:
 			System.out.println(e.getMessage());
 			System.out.println("error in parameter or argument that you try to add");
+			break;
+		case MySQLSyntaxErrorException :
+			System.out.println(e.getMessage());
+			System.out.println("the wrong  syntax Coupon query ");
 			break;
 		default:
 				e.getMessage();

@@ -1,5 +1,6 @@
 package Coupon.System.Facade;
 
+import java.sql.SQLException;
 import java.util.Collection;
 
 import com.sys.exception.CouponException;
@@ -33,7 +34,7 @@ public interface CustomerFacadeDAO
 	 */
 	public Collection<Coupon>getAllPurchasedCoupons(Customer cust);
 	/**
-	 * the Customer can found  all coupons that purchased throu the system by coupon type
+	 * the Customer can found  all coupons that purchased throw the system by coupon type
 	 * @param ctype - coupon type 
 	 * @return - list of  coupons founded
 	 */
@@ -44,6 +45,14 @@ public interface CustomerFacadeDAO
 	 * @return - list of coupon with the price 
 	 */
 	public Collection<Coupon>getAllPurchasedCouponsByPrice(double price);
+	/**
+	 * find all coupons in system
+	 * @return - list  of  all coupons 
+	 * @throws InterruptedException
+	 * @throws SQLException
+	 * @throws CouponException
+	 */
+	Collection<Coupon> findCoupons() throws InterruptedException, SQLException, CouponException;
 	
 
 }

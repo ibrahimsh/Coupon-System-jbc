@@ -77,7 +77,8 @@ public class CustomerDBDA implements CustomerDAO {
 		PreparedStatement createCust = conn.prepareStatement(sqlQuery.customerQuerys.insertIntoCustomer);
 		createCust.setString(1,cust.getCustName());
 		createCust.setString(2,cust.getPassword());
-		if(createCust.executeUpdate()>0)
+		int crtcust =createCust.executeUpdate();
+		if(crtcust>0)
 		{
 			System.out.println("the customer " + cust.getCustName() + "added successfully to system enjoy");
 		}
@@ -121,7 +122,8 @@ public class CustomerDBDA implements CustomerDAO {
 		update.setString(1,cust.getCustName());
 		update.setString(2,cust.getPassword());
 		update.setLong(3, cust.getId());
-		if(update.executeUpdate()>0)
+		int updateCust =update.executeUpdate();
+		if(updateCust>0)
 		{
 			System.out.println("the Customer updated sucessfully");
 		}
@@ -151,10 +153,10 @@ public class CustomerDBDA implements CustomerDAO {
 			{
 				System.out.println("the customer Coupon delete form customer coupons successfully");
 			}
-			else
+			/*else
 			{
 				throw new CustomerException("cannot remove Coupon from customer coupon or  the coupon dosent exist");
-			}
+			}*/
 			PreparedStatement rem = conn.prepareStatement(sqlQuery.customerQuerys.removeCustomerByName);
 			rem.setString(1, cust.getCustName());
 			System.out.println("cust name "+cust.getCustName());
@@ -164,11 +166,14 @@ public class CustomerDBDA implements CustomerDAO {
 			{
 				System.out.println("the customer "+cust.getCustName() + " removed sucessfully from system ");
 			}
-			else{ throw new CustomerException("the Customer name  "+cust.getCustName()+"  dosent exist ");}
+			else
+			{
+				throw new CustomerException("the Customer name  "+cust.getCustName()+"  dosent exist ");
+				}
 	
 	//			throw new SQLException("cannot find the customer that you want to remove try again");
 	
-		conPool.returnConnection(conn);
+			conPool.returnConnection(conn);
 		
 	}
 
@@ -188,18 +193,19 @@ public class CustomerDBDA implements CustomerDAO {
 		Statement getCust = conn.createStatement();
 		ResultSet res = getCust.executeQuery(String.format(sqlQuery.customerQuerys.searchCustomerByID,id));
 		
-		if(res !=null)
+	
+		while(res.next())
 		{
-			while(res.next())
-			{
-			    ct = new Customer();
-				ct.setId(res.getLong("ID"));
-				ct.setCustName(res.getString("CUST_NAME"));
-				ct.setPassword(res.getString("PASSWORD"));
-			}
-			System.out.println("customer id :"+id +" is  found Successfully Enjoy !");
+		    ct = new Customer();
+			ct.setId(res.getLong("ID"));
+			ct.setCustName(res.getString("CUST_NAME"));
+			ct.setPassword(res.getString("PASSWORD"));
 		}
-		else{
+		if(ct !=null)
+		{
+			System.out.println("customer id :"+id +" is  found Successfully Enjoy !");
+	
+		}else{
 			throw new CustomerException(" Cannot foud Customer Where the id is "+id +"try agian");
 		}
 		
@@ -223,16 +229,17 @@ public class CustomerDBDA implements CustomerDAO {
 		conn = conPool.getConnection();
 		Statement st  = conn.createStatement();
 		ResultSet re = st.executeQuery(sqlQuery.customerQuerys.getCustomer);
-		if(re != null)
+		
+		while(re.next())
 		{
-			while(re.next())
-			{
-				Customer cust = new Customer();
-				cust.setId(re.getLong("ID"));
-				cust.setCustName(re.getString("CUST_NAME"));
-				cust.setPassword(re.getString("PASSWORD"));
-				allCust.add(cust);
-			}
+			Customer cust = new Customer();
+			cust.setId(re.getLong("ID"));
+			cust.setCustName(re.getString("CUST_NAME"));
+			cust.setPassword(re.getString("PASSWORD"));
+			allCust.add(cust);
+		}
+		if(allCust.size()>0)
+		{
 			System.out.println("the Customer List is found  in system successfully enjoy");
 		}
 		else
@@ -252,17 +259,20 @@ public class CustomerDBDA implements CustomerDAO {
 	 * @throws InterruptedException 
 	 * @throws CustomerException 
 	 */
-	/*
+	
 	@Override
-	public Collection<Coupon>getAllCoupons() throws  SQLException, InterruptedException, CouponException, CustomerException
+	public Collection<Coupon>getAllCoupons() throws  SQLException, InterruptedException, CouponException, CustomerException, ClassNotFoundException
 	{
+		Collection<Coupon> coupons = new ArrayList<Coupon>();
 		CouponDBDA allCoup = new CouponDBDA();
-		if(allCoup.getAllCoupon() != null)
+		coupons = allCoup.getAllCoupon();
+		if(coupons.isEmpty())
 		{
-			
+			throw  new CustomerException("there is  no coupons in system");
 		}
+		return coupons;
 	}
-	*/
+	
 	/**
 	 * get all Customer Coupons  that he purchased
 	 * @throws InterruptedException 
@@ -281,42 +291,43 @@ public class CustomerDBDA implements CustomerDAO {
 		PreparedStatement getcustCoupon = conn.prepareStatement(sqlQuery.customerQuerys.getCustomerCoupons);
 		getcustCoupon.setLong(1,this.getUserCustId());	
 		ResultSet res = getcustCoupon.executeQuery();
-		if(res != null)
+		
+		while(res.next())
 		{
-			while(res.next())
+			couponsId.add(res.getLong("COUP_ID"));
+		}
+		for (int i = 0; i < couponsId.size(); i++) 
+		{
+			PreparedStatement  coupons = conn.prepareStatement(sqlQuery.couponQuerys.getCouponById);
+			coupons.setLong(1,couponsId.get(i));
+			ResultSet fcop = coupons.executeQuery();
+			while(fcop.next())
 			{
-				couponsId.add(res.getLong("COUP_ID"));
+					Coupon coup = new Coupon();
+					long idc =fcop.getLong("ID");
+					String ti = fcop.getString("title");
+					Date sd = fcop.getDate("startDate");
+					Date ed= fcop.getDate("endDate");
+					int am = fcop.getInt("amount");
+					String t= fcop.getString("type");
+					String ms = fcop.getString("message");
+					double pr = fcop.getDouble("price");
+					String img =fcop.getString("image");
+					coup.setId(idc);
+					coup.setTitle(ti);
+					coup.setStartDate(sd);
+					coup.setEndDate(ed);
+					coup.setAmount(am);
+					
+					coup.setCtyp(CouponType.findValue(t));
+					coup.setMessage(ms);
+					coup.setPrice(pr);
+					coup.setImage("img");
+					cust_coup.add(coup);
 			}
-			for (int i = 0; i < couponsId.size(); i++) 
-			{
-				PreparedStatement  coupons = conn.prepareStatement(sqlQuery.couponQuerys.getCouponById);
-				coupons.setLong(1,couponsId.get(i));
-				ResultSet fcop = coupons.executeQuery();
-				while(fcop.next())
-				{
-						Coupon coup = new Coupon();
-						long idc =fcop.getLong("ID");
-						String ti = fcop.getString("title");
-						Date sd = fcop.getDate("startDate");
-						Date ed= fcop.getDate("endDate");
-						int am = fcop.getInt("amount");
-						String t= fcop.getString("type");
-						String ms = fcop.getString("message");
-						double pr = fcop.getDouble("price");
-						String img =fcop.getString("image");
-						coup.setId(idc);
-						coup.setTitle(ti);
-						coup.setStartDate(sd);
-						coup.setEndDate(ed);
-						coup.setAmount(am);
-						
-						coup.setCtyp(CouponType.findValue(t));
-						coup.setMessage(ms);
-						coup.setPrice(pr);
-						coup.setImage("img");
-						cust_coup.add(coup);
-				}
-			}
+		}
+		if(couponsId.size()>0 && cust_coup.size()>0)
+		{
 			System.out.println("customer Coupons list found ");
 		}
 		else
@@ -350,9 +361,7 @@ public class CustomerDBDA implements CustomerDAO {
 		PreparedStatement getcustCoupon = conn.prepareStatement(sqlQuery.customerQuerys.getCustomerCoupons);
 		getcustCoupon.setLong(1,this.getUserCustId());	
 		ResultSet res = getcustCoupon.executeQuery();
-		if(res != null)
-		{
-			while(res.next())
+		while(res.next())
 			{
 				couponsId.add(res.getLong("COUP_ID"));
 			}
@@ -385,10 +394,13 @@ public class CustomerDBDA implements CustomerDAO {
 						coup.setPrice(pr);
 						coup.setImage("img");
 						cust_coup.add(coup);
-				}		
+				}
 			}
+		if(cust_coup.size()>0 && couponsId.size()>0)
+		{
 			System.out.println(" list of  coupons for by the Type "+ctyp);
 		}
+		
 		else
 		{
 			throw new CustomerException("no Coupons found for"+cust.getCustName() +"Type "+ctyp);
@@ -418,47 +430,48 @@ public class CustomerDBDA implements CustomerDAO {
 		
 		conn = conPool.getConnection();
 		PreparedStatement getcustCoupon = conn.prepareStatement(sqlQuery.customerQuerys.getCustomerCoupons);
-		getcustCoupon.setLong(1,this.getUserCustId());	
+		getcustCoupon.setLong(1,this.getCustomerID(cust));	
 		ResultSet res = getcustCoupon.executeQuery();
-		if(res != null)
+		
+		while(res.next())
 		{
-			while(res.next())
+			couponsId.add(res.getLong("COUP_ID"));
+		}
+		for (int i = 0; i < couponsId.size(); i++) 
+		{
+			PreparedStatement  coupons = conn.prepareStatement(sqlQuery.customerQuerys.getCustCouponByPrice);
+			coupons.setLong(1,couponsId.get(i));
+			coupons.setDouble(2,price);
+			ResultSet fcop = coupons.executeQuery();
+			while(fcop.next())
 			{
-				couponsId.add(res.getLong("COUP_ID"));
-			}
-			for (int i = 0; i < couponsId.size(); i++) 
-			{
-				PreparedStatement  coupons = conn.prepareStatement(sqlQuery.customerQuerys.getCustCouponByPrice);
-				coupons.setLong(1,couponsId.get(i));
-				coupons.setDouble(2,price);
-				ResultSet fcop = coupons.executeQuery();
-				while(fcop.next())
-				{
-						Coupon coup = new Coupon();
-						long idc =fcop.getLong("ID");
-						String ti = fcop.getString("title");
-						Date sd = fcop.getDate("startDate");
-						Date ed= fcop.getDate("endDate");
-						int am = fcop.getInt("amount");
-						String t= fcop.getString("type");
-						String ms = fcop.getString("message");
-						double pr = fcop.getDouble("price");
-						String img =fcop.getString("image");
-						coup.setId(idc);
-						coup.setTitle(ti);
-						coup.setStartDate(sd);
-						coup.setEndDate(ed);
-						coup.setAmount(am);
-						
-						coup.setCtyp(CouponType.findValue(t));
-						coup.setMessage(ms);
-						coup.setPrice(pr);
-						coup.setImage("img");
-						cust_coup.add(coup);
-				}
+					Coupon coup = new Coupon();
+					long idc =fcop.getLong("ID");
+					String ti = fcop.getString("title");
+					Date sd = fcop.getDate("startDate");
+					Date ed= fcop.getDate("endDate");
+					int am = fcop.getInt("amount");
+					String t= fcop.getString("type");
+					String ms = fcop.getString("message");
+					double pr = fcop.getDouble("price");
+					String img =fcop.getString("image");
+					coup.setId(idc);
+					coup.setTitle(ti);
+					coup.setStartDate(sd);
+					coup.setEndDate(ed);
+					coup.setAmount(am);
 					
-			
+					coup.setCtyp(CouponType.findValue(t));
+					coup.setMessage(ms);
+					coup.setPrice(pr);
+					coup.setImage("img");
+					cust_coup.add(coup);
 			}
+				
+		
+		}
+		if(cust_coup.size()>0 && couponsId.size()>0)
+		{
 			System.out.println("the customer puchased coupon list is found for price :"+price);
 		}
 		else{
@@ -488,32 +501,34 @@ public class CustomerDBDA implements CustomerDAO {
 		boolean isfound = false;
 		
 		conn = conPool.getConnection();
-		Statement st = conn.createStatement();
-		ResultSet res = st.executeQuery(sqlQuery.customerQuerys.login);
-		if(res != null)
+		PreparedStatement st = conn.prepareStatement(sqlQuery.customerQuerys.login);
+		ResultSet res = st.executeQuery();
+		
+		while(res.next())
 		{
-			while(res.next())
+			System.out.println("inside while customer");
+			userName =res.getString(1);
+			System.out.println(userName);
+			pass = res.getString(2);
+			System.out.println(pass);
+			if(userName.equals(cust.trim()) && pass.equals(password.trim()) )
 			{
-				userName =res.getString(1);
-				pass = res.getString(2);
-				if(userName.equals(cust) && pass.equals(password) )
-				{
-					isfound = true;
-					System.out.println("the user is founded" + cust +"login successfully Enjoy");
-				}
-				else
-				{
-					isfound = false;
-					throw new CustomerException(" the user name or password you enter is wrong try again");
-				}
-				
+				isfound = true;
+				System.out.println("the user is founded" + cust +"login successfully Enjoy");
 			}
+			
+		}
+	/*	if(isfound == true)
+		{
+			System.out.println("login successfully ");
 		}
 		else
 		{
-			isfound =false;
-			throw new CustomerException(" login Fail Try again later");
-		}
+			
+			//throw new CustomerException(" login Fail Try again later");
+			
+			throw new CustomerException(" the user name or password you enter is wrong try again");
+		}*/
 
 		
 		return isfound;
@@ -537,16 +552,15 @@ public class CustomerDBDA implements CustomerDAO {
 		PreparedStatement custid = conn.prepareStatement(sqlQuery.customerQuerys.customerId);
 		custid.setString(1,cust.getCustName());
 		ResultSet res = custid.executeQuery();
-		if(res != null)
+		
+		while(res.next())
 		{
-			while(res.next())
-			{
-				customerId = res.getLong(1);
-				System.out.println("the  customer  id  by his  name :"+customerId);
-				
-			}
+			customerId = res.getLong(1);
+			System.out.println("the  customer  id  by his  name :"+customerId);
+			
 		}
-		else{
+		
+		if(customerId == 0){
 			throw new CustomerException("Cannot foud  Customer id or  the customer dosent exist");
 		}
 			
@@ -570,34 +584,32 @@ public class CustomerDBDA implements CustomerDAO {
 	@Override
 	public void addCouponCustomer(Customer cust , Coupon coup) throws InterruptedException, SQLException, CustomerException, CouponException, ClassNotFoundException
 	{
-		
+			CouponDBDA update = new CouponDBDA();
 			conn= conPool.getConnection();
 			PreparedStatement addCCoup = conn.prepareStatement(sqlQuery.customerQuerys.addcouponCustomer);
 			addCCoup.executeUpdate();
 			PreparedStatement insertCoup = conn.prepareStatement(sqlQuery.customerQuerys.customerCoupon);
 			insertCoup.setLong(1,this.getCustomerID(cust));
-			System.out.println("test"+this.getUserCustomerId);
-			insertCoup.setLong(2,coup.getId());
-			insertCoup.executeUpdate();
-			
-			
+			//System.out.println("test"+this.getUserCustomerId);
+			insertCoup.setLong(2,update.CouponId(coup));
+			int insrtcoup = insertCoup.executeUpdate();
+	
 			PreparedStatement changeAmount = conn.prepareStatement(sqlQuery.customerQuerys.CouponAmount);
 			changeAmount.setLong(1,coup.getId());
 			ResultSet res = changeAmount.executeQuery();
 			int amount =0;
-			if(res != null)
+			
+			while(res.next())
 			{
-				while(res.next())
-				{
-					amount = res.getInt("amount");
-				}
-				CouponDBDA update = new CouponDBDA();
-				int nAmount = amount-1;
-				coup.setAmount(nAmount);
-				update.updatecoupon(coup);
-				System.out.println("the Customer"+cust.getCustName() +"purachased coupon"+coup.getTitle() + "successfully and  added to customer list");
+				amount = res.getInt("amount");
 			}
-			else
+			//CouponDBDA update = new CouponDBDA();
+			int nAmount = coup.getAmount()-1;
+			coup.setAmount(nAmount);
+			update.updatecoupon(coup);
+			System.out.println("the Customer"+cust.getCustName() +"purachased coupon"+coup.getTitle() + "successfully and  added to customer list");
+			
+			if(insrtcoup ==0)
 			{
 				throw new CustomerException("Cannot add  coupon  "+coup.getTitle() + "try agian later");
 			}

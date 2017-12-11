@@ -26,9 +26,9 @@ public class couponQuerys {
 	public static String removeCoupon = "DELETE FROM Coupons WHERE ID = ?";
 	public static String updateCoupon =  "UPDATE Coupons SET title=?,startDate=?,endDate=?,amount =?,type=?,"
 			+ "message=?, price=?,image=? WHERE ID=? ";
-	public static String getCouponById =  "SELECT * FROM Coupons WHERE ID='%1s'";
+	public static String getCouponById =  "SELECT * FROM Coupons WHERE ID='%s'";
 	public static String getAllcoupons = "SELECT * From Coupons ";
-	public static String getCouponByType = "SELECT * From Coupons Where type LIKE ".trim();
+	public static String getCouponByType = "SELECT * From Coupons Where type =?";
 	public static String getCouponId = "SELECT * FROM Coupons WHERE title = ?" ;
 	public static String removeCustcoupon = "DELETE FROM customer_coupon where COUP_ID = ? ";
 	public static String removeCompcoupon = "DELETE FROM company_coupon where COUP_ID = ? ";

@@ -37,9 +37,11 @@ public class companyException extends Exception  implements Serializable
 	public static void CompanyExceptionHandler(Exception e)
 	{
 		
-		String exceptions[] = e.getClass().toString().split( "\\." );
-		String exceptionClass = exceptions[exceptions.length - 1];
-		ExceptionType exceptionType =ExceptionType.valueOf(exceptionClass);//= ExceptionType.valueOf(exceptionClass);
+		//String exceptions[] = e.getClass().toString().split( "\\." );
+		String exceptions = e.getClass().getSimpleName();
+		System.out.println("exception"+exceptions);
+		//String exceptionClass = exceptions[exceptions.length - 1];
+		ExceptionType exceptionType =ExceptionType.valueOf(exceptions);//= ExceptionType.valueOf(exceptionClass);
 
 		switch(exceptionType)
 		{
@@ -63,14 +65,11 @@ public class companyException extends Exception  implements Serializable
 				System.out.println(e.getMessage());
 				System.out.println("either the Company name or the password is wrong - can't login!");
 				break;
-		case DuplicateCouponTypeException :
-				System.out.println(e.getMessage());
-				System.out.println("can't purchase coupon - same coupon type already exist!");
-				break;
-		case UnAvailableCouponException :
-				System.out.println(e.getMessage());
-				System.out.println("can't purchase coupon - no more available coupons or coupon is expired");
-				break;
+		case companyException : 
+			System.out.println(e.getMessage());
+			System.out.println("Company added Coupon exception");
+			break;
+		
 		case NullConnectionException :
 				System.out.println(e.getMessage());
 				System.out.println("your connection is null - the system might be shutting down!");
@@ -78,6 +77,11 @@ public class companyException extends Exception  implements Serializable
 			System.out.println(e.getMessage());
 			System.out.println("error in parameter or argument that you try to add");
 			break;
+		case MySQLIntegrityConstraintViolationException :
+			System.out.println(e.getMessage());
+			System.out.println("problem with entries check  you entry again ");
+			
+			
 		default:
 				e.printStackTrace();;
 		}

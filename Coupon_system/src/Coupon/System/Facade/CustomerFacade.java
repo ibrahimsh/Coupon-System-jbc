@@ -22,25 +22,34 @@ public class CustomerFacade implements CustomerFacadeDAO ,CouponClientFacadeDAO{
 	private Collection<Coupon>getAllcoupons ;
 	private Customer _customer ;
 	
-	
+	/**
+	 * constructor customer facade
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 */
 	public CustomerFacade() throws ClassNotFoundException, SQLException
 	{
-		try{
+		
 			
 		
 			this._customerdbda = new CustomerDBDA();
 			
 			this._coupondbda = new CouponDBDA();
 			this._coupon = new Coupon();
-			this.set_customer(new Customer());
+			this._customer = new Customer();
 			this.getAllcoupons = new ArrayList<Coupon>();
-		}catch(Exception  e)
-		{
-			//CouponException.CouponExceptionHandler(e);
-			//CustomerException.CustomerExceptionHandler(e);
-		}
+	
 		
 	}
+	@Override
+	public Collection<Coupon>findCoupons() throws InterruptedException, SQLException, CouponException
+	{
+		this.getAllcoupons =this._coupondbda.getAllCoupon();
+		return this.getAllcoupons;
+	}
+	/**
+	 * customer purchase new  coupon
+	 */
 	@Override
 	public void purchaseCoupon(Coupon coup,Customer cust) throws ClassNotFoundException, CouponException
 	{
@@ -48,7 +57,7 @@ public class CustomerFacade implements CustomerFacadeDAO ,CouponClientFacadeDAO{
 			this._customerdbda.addCouponCustomer(cust, coup);
 		}catch(Exception e)
 		{
-			
+			e.printStackTrace();
 			CustomerException.CustomerExceptionHandler(e);
 		}
 		
@@ -96,17 +105,17 @@ public class CustomerFacade implements CustomerFacadeDAO ,CouponClientFacadeDAO{
 	}
 
 	@Override
-	public boolean login(String CustName, String password, clientType cltyp) throws ClassNotFoundException {
+	public CouponClientFacadeDAO login(String CustName, String password, clientType cltyp) throws ClassNotFoundException, CustomerException {
 		boolean is_Customer  = false;
 		CustomerFacade custfacade =null;
-		if(cltyp.equals("CUSTOMER"))
+		if(cltyp.equals(clientType.CUSTOMER))
 		{ try
 			{
-				if(_customerdbda.login(CustName, password))
+				if(_customerdbda.login(CustName, password)==true)
 				{
 					is_Customer = true;
 					custfacade = new CustomerFacade();
-					System.out.println("Login succefull");
+					System.out.println("Login successfully");
 				}
 				else{
 					is_Customer = false;
@@ -114,51 +123,18 @@ public class CustomerFacade implements CustomerFacadeDAO ,CouponClientFacadeDAO{
 				}
 			}catch(Exception e)
 			{
-				
-				//CustomerException.CustomerExceptionHandler(e);
+				System.out.println(e.getClass().getSimpleName());
+				CustomerException.CustomerExceptionHandler(e);
 			}
 		}
 		else
 		{
 			is_Customer = false;
-			System.out.println("you  try to login in as"+cltyp +", you  dont  have  the write access type choose you type if customer or admin or company");
+			throw new CustomerException("you  try to login in as"+cltyp +", you  dont  have  the write access type choose you type if customer or admin or company");
 		}
-		return is_Customer;
+		return custfacade;
 	}
-	/**
-	 * getter and  setter for class member
-	 * @param
-	 * @return 
-	 */
-	public CouponDBDA get_coupondbda() {
-		return _coupondbda;
-	}
-	public void set_coupondbda(CouponDBDA _coupondbda) {
-		this._coupondbda = _coupondbda;
-	}
-	public Coupon get_coupon() {
-		return _coupon;
-	}
-	public void set_coupon(Coupon _coupon) {
-		this._coupon = _coupon;
-	}
-	public Collection<Coupon> getGetAllcoupons() {
-		return getAllcoupons;
-	}
-	public void setGetAllcoupons(Collection<Coupon> getAllcoupons) {
-		this.getAllcoupons = getAllcoupons;
-	}
-	public CustomerDBDA get_customerdbda() {
-		return _customerdbda;
-	}
-	public void set_customerdbda(CustomerDBDA _customerdbda) {
-		this._customerdbda = _customerdbda;
-	}
-	public Customer get_customer() {
-		return _customer;
-	}
-	public void set_customer(Customer _customer) {
-		this._customer = _customer;
-	}
+	
+	
 
 }

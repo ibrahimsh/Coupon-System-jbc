@@ -67,14 +67,17 @@ public class CouponSystemException extends Exception {
 				System.out.println(e.getMessage());
 				System.out.println("Coupon information is wrong try again");
 				break;
-		case DuplicateCouponTypeException :
+		case companyException : 
 				System.out.println(e.getMessage());
-				System.out.println("can't purchase coupon - same coupon type already exist!");
+				System.out.println("problem with company database");
 				break;
-		case UnAvailableCouponException :
-				System.out.println(e.getMessage());
-				System.out.println("can't purchase coupon - no more available coupons or coupon is expired");
-				break;
+		case CouponException :
+			System.out.println(e.getMessage());
+			System.out.println("problem with coupon database");
+			break;
+		case CustomerException :
+			System.out.println(e.getMessage());
+			System.out.println("problem with Customer database");
 		case NullConnectionException :
 				System.out.println(e.getMessage());
 				System.out.println("your connection is null - the system might be shutting down!");
@@ -82,6 +85,9 @@ public class CouponSystemException extends Exception {
 			System.out.println(e.getMessage());
 			System.out.println("error in parameter or argument that you try to add");
 			break;
+		case CouponSystemException :
+			System.out.println(e.getMessage());
+			System.out.println("Problem with DailyCoupon  remover thread");
 		default:
 				e.getMessage();
 				break;

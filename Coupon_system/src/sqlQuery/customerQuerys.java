@@ -13,7 +13,7 @@ public class customerQuerys {
 			+ ", CUST_NAME varchar(100) NOT NULL UNIQUE "
 			+ " ,PASSWORD varchar(20) NOT NULL, "
 			+ " primary key(ID))".trim();
-	public static String searchCustomerByID = "SELECT * FROM Customers WHERE ID = ?";
+	public static String searchCustomerByID = "SELECT * FROM Customers WHERE ID='%s'";
 	public static String insertIntoCustomer = "INSERT INTO Customers(CUST_NAME,PASSWORD) VALUES (?,?)";
 	public static String getCustomer = "SELECT * FROM customers";
 	public static String removeCustomerByName = "DELETE FROM Customers WHERE CUST_NAME =?";
@@ -28,7 +28,7 @@ public class customerQuerys {
 	public static String customerId = "SELECT ID FROM Customers WHERE CUST_NAME = ?";
 	public static String getCustomerCoupons = "SELECT * FROM customer_coupon WHERE CUST_ID =? " ;
 	public static String getCustCoupByType = "SELECT  * FROM coupons where ID=? and type = ?";
-	public static String getCustCouponByPrice = "SELECT * FROM coupons WHERE ID = ? and price= ?";
+	public static String getCustCouponByPrice = "SELECT * FROM coupons WHERE ID = ? and price <= ?";
 	public static String CouponAmount = " SELECT amount from coupons WHERE ID=?";
 
 }

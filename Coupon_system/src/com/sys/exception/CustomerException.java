@@ -76,14 +76,9 @@ public class CustomerException extends Exception implements Serializable
 					System.out.println(e.getMessage());
 					System.out.println("either the customer name or the password is wrong - can't login!");
 					break;
-			case DuplicateCouponTypeException :
-					System.out.println(e.getMessage());
-					System.out.println("can't purchase coupon - same coupon type already exist!");
-					break;
-			case UnAvailableCouponException :
-					System.out.println(e.getMessage());
-					System.out.println("can't purchase coupon - no more available coupons or coupon is expired");
-					break;
+			case CustomerException :
+				System.out.println(e.getMessage());
+				System.out.println("problem with customer table connection ");
 			case NullConnectionException :
 					System.out.println(e.getMessage());
 					System.out.println("your connection is null - the system might be shutting down!");

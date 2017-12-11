@@ -3,6 +3,7 @@ package DAO_connection;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import com.sys.exception.CouponException;
 import com.sys.exception.companyException;
 
 import java_beans.*;
@@ -93,8 +94,10 @@ public interface CompanyDAO
  * @throws InterruptedException 
  * @throws SQLException 
  * @throws companyException 
+ * @throws ClassNotFoundException 
+ * @throws CouponException 
   */
- public  void  addCouponToCompany(Coupon c , Company com) throws InterruptedException, SQLException, companyException;
+ public  void  addCouponToCompany(Coupon c , Company com) throws InterruptedException, SQLException, companyException, ClassNotFoundException, CouponException;
  /**
   * <b> get Company Coupons </b> 
   * @param comp - Company that we want  to find  own coupon
@@ -104,7 +107,17 @@ public interface CompanyDAO
  * @throws companyException 
   */
  public Collection<Coupon> getCoupons(Company comp) throws InterruptedException, SQLException, companyException;
- //public long getID(String name) throws SQLException
+/**
+ * <b> find Company coupon by type </b>
+ * @param typ
+ * @param comp
+ * @return
+ * @throws InterruptedException
+ * @throws SQLException
+ * @throws companyException
+ */
+Collection<Coupon> getCouponsByType(CouponType typ, Company comp)
+		throws InterruptedException, SQLException, companyException;
  
  
 }

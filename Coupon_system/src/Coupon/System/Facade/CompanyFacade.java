@@ -43,49 +43,58 @@ public class CompanyFacade implements CompanyFacadDAO,CouponClientFacadeDAO
 	{
 		this._companydbda = new CompanyDBDA();
 		this._coupondbda = new CouponDBDA();
-		this.set_company(new Company());
-		this.set_coupon(new Coupon());
+		this._company =new Company();
+		this._coupon =new Coupon();
 		
 	}
 	/**
 	 * @createCoupon
 	 * @param {@Coupon}
 	 * this  method get  company the  ability to create coupon
+	 * @throws companyException 
 	 * @throws  
 	 * @throws CouponException 
 	 * @throws SQLException 
 	 * @throws InterruptedException 
 	 */
 	@Override
-	public void createCoupon(Coupon coup){
+	public void createCoupon(Coupon coup,Company comp) throws companyException{
 		
 		try{
 			this._coupondbda.createCoupon(coup);
-			this._companydbda.addCouponToCompany(coup,this._company);
+			//this._company.setId(_companydbda.getID(this._company.getCompName()));
+			//System.out.println("the id  of  company"+this._company.getId());
+			this._companydbda.addCouponToCompany(coup,comp);
 		}catch(Exception e)
 		{
-			CouponException.CouponExceptionHandler(e);
+			System.out.println("createCoupon Company facade :: "+e.getClass().getSimpleName());
+			//throw new companyException("problem with creating  coupon");
 			companyException.CompanyExceptionHandler(e);
+			e.printStackTrace();
 		}
 		
 		
 	}
 /**
- *@removeCoupon
+ *@throws companyException 
+ * @throws CouponException 
+ * @throws SQLException 
+ * @throws InterruptedException 
+ * @removeCoupon
  *@param{Coupon}
  *this method  give  the  company to remove  coupon from there table 
  */
 	@Override
-	public void removeCoupon(Coupon coup) {
+	public void removeCoupon(Coupon coup) throws companyException, InterruptedException, SQLException, CouponException {
 
-		try
-		{
+		try{
 			this._coupondbda.removeCoupon(coup);
-		}catch(Exception e)
+		}catch (Exception e)
 		{
-			CouponException.CouponExceptionHandler(e);
-			
+			companyException.CompanyExceptionHandler(e);
 		}
+		
+		
 		
 	}
 /**
@@ -100,6 +109,7 @@ public class CompanyFacade implements CompanyFacadDAO,CouponClientFacadeDAO
 				this._coupondbda.updatecoupon(coup);
 		}catch(Exception e)
 		{
+			e.printStackTrace();
 			CouponException.CouponExceptionHandler(e);
 		
 		}
@@ -118,7 +128,7 @@ public class CompanyFacade implements CompanyFacadDAO,CouponClientFacadeDAO
 			this.allCoupons = this._companydbda.getCoupons(comp);
 		}catch(Exception e)
 		{
-			
+			e.printStackTrace();
 			companyException.CompanyExceptionHandler(e);
 		}
 		return this.allCoupons ;
@@ -138,6 +148,8 @@ public class CompanyFacade implements CompanyFacadDAO,CouponClientFacadeDAO
 			this._coupon = this._coupondbda.getCoupon(id);
 		}catch(Exception e)
 		{
+			e.printStackTrace();
+			System.out.println(e.getClass().getSimpleName());
 			CouponException.CouponExceptionHandler(e);
 			
 		}
@@ -149,12 +161,13 @@ public class CompanyFacade implements CompanyFacadDAO,CouponClientFacadeDAO
  * @return allCoupons
  */
 	@Override
-	public Collection<Coupon> getCouponByType(CouponType ctyp)
+	public Collection<Coupon> getCouponByType(CouponType ctyp,Company comp)
 	{	try
 		{
-		 this.allCoupons=_coupondbda.getCouponByType(ctyp);
+		 this.allCoupons=this._companydbda.getCouponsByType(ctyp,comp);
 		}catch(Exception e)
 		{
+			e.printStackTrace();
 			CouponException.CouponExceptionHandler(e);
 			
 		}
@@ -171,16 +184,17 @@ public class CompanyFacade implements CompanyFacadDAO,CouponClientFacadeDAO
  * @throws ClassNotFoundException 
  */
 	@Override
-	public boolean login(String UserName, String password, clientType type) throws ClassNotFoundException, SQLException
+	public CouponClientFacadeDAO login(String UserName, String password, clientType type) throws ClassNotFoundException, SQLException
 	{	boolean isCompany = false;
 		this._companydbda = new CompanyDBDA();
+		CompanyFacade compfacade = null;
 		if(type.equals(clientType.COMPANY))
 		{ 
 			try{
-				if(this._companydbda.login(UserName, password))
+				if(this._companydbda.login(UserName, password)==true)
 				{
 					isCompany= true;
-					CompanyFacade comfacade =new CompanyFacade();
+					compfacade =new CompanyFacade();
 				}
 			}catch(Exception e)
 			{
@@ -192,7 +206,7 @@ public class CompanyFacade implements CompanyFacadDAO,CouponClientFacadeDAO
 			isCompany = false;
 			System.err.println("choose the correct account type you want to access to (admin,Company,Customer)");
 		}
-		return isCompany;
+		return compfacade;
 	}
 	/**
 	 * @getter
@@ -212,5 +226,6 @@ public class CompanyFacade implements CompanyFacadDAO,CouponClientFacadeDAO
 	public void set_coupon(Coupon _coupon) {
 		this._coupon = _coupon;
 	}
+
 
 }

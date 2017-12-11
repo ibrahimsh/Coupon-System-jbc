@@ -3,6 +3,7 @@ package Coupon.System.Facade;
 import java.sql.SQLException;
 
 import com.sys.exception.CouponSystemException;
+import com.sys.exception.CustomerException;
 
 /**
  * 
@@ -21,7 +22,8 @@ public interface CouponClientFacadeDAO {
 	 * @throws CouponSystemException 
 	 * @throws SQLException 
 	 * @throws ClassNotFoundException 
+	 * @throws CustomerException 
 	 */
-	public boolean login(String UserName,String password ,clientType cliType) throws CouponSystemException, ClassNotFoundException, SQLException;
+	public CouponClientFacadeDAO login(String UserName,String password ,clientType cliType) throws CouponSystemException, ClassNotFoundException, SQLException, CustomerException;
 
 }

@@ -11,6 +11,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import com.sys.exception.CouponException;
 import com.sys.exception.companyException;
 
 import java_beans.Company;
@@ -121,8 +122,8 @@ public class CompanyDBDA implements CompanyDAO{
 		//remcouponComp.executeUpdate();
 		PreparedStatement statm = conn.prepareStatement(sqlQuery.companyQuerys.removeCompanyByName);
 		statm.setString(1,comp.getCompName());
-		//statm.executeUpdate();
-		if(statm.executeUpdate() >0)
+		int r =statm.executeUpdate();
+		if(r>0)
 		{
 			System.out.println(this.getID(comp.getCompName()));
 			System.out.println("the Company is "+comp.getCompName() + " removed successfully ");
@@ -192,34 +193,29 @@ public class CompanyDBDA implements CompanyDAO{
 		ResultSet get = st.executeQuery();
 		
 		System.out.println("RESGET"+" "+get);
-		if(get !=null)
+	
+		while(get.next())
 		{
-			
-		
-			while(get.next())
-			{
-				comp = new Company();
-				long gid = get.getLong("id");
-				comp.setId(gid);
-				String cname =get.getString("comp_name");
-				comp.setCompName(cname);
-				System.out.println("name"+""+comp.getCompName());
-				String pass = get.getString("password");
-				comp.setPassword(pass);
-				String email = get.getString("email");
-				comp.setEmail(email);
-				
-				//comp.setCoupons(null);
-				
-			}
+			comp = new Company();
+			long gid = get.getLong("id");
+			comp.setId(gid);
+			String cname =get.getString("comp_name");
+			comp.setCompName(cname);
+			System.out.println("name"+""+comp.getCompName());
+			String pass = get.getString("password");
+			comp.setPassword(pass);
+			String email = get.getString("email");
+			comp.setEmail(email);
+	
+		}
+		if(comp != null)
+		{
 			System.out.println("the Comapny Id"+id +"found  successfully");
 		}
-		else
-		{
-			throw new companyException("Cannot  found Comapny in id  "+id+" try with other id ");
+		else{
+		throw new companyException("Cannot  found company in id :  "+id+" try with other id ");
 		}
-		
-		
+
 		conPool.returnConnection(conn);
 		return comp;
 	}
@@ -238,29 +234,28 @@ public class CompanyDBDA implements CompanyDAO{
 		conn = conPool.getConnection();
 		Statement st = conn.createStatement();
 		ResultSet res = st.executeQuery(sqlQuery.companyQuerys.getCompany);
-		if(res != null)
-		{
-			while(res.next())
-			{
-				comp = new Company();
-				long gid = res.getLong("id");
-				comp.setId(gid);
-				String cname =res.getString("comp_name");
-				comp.setCompName(cname);
-				System.out.println("name"+""+comp.getCompName());
-				String pass = res.getString("password");
-				comp.setPassword(pass);
-				String email = res.getString("email");
-				comp.setEmail(email);
-				
-				comp.setCoupons(null);
-				company.add(comp);
-				
-				
 		
-			System.out.println("the search for  all company insystem succssfully");}
+		while(res.next())
+		{
+			comp = new Company();
+			long gid = res.getLong("id");
+			comp.setId(gid);
+			String cname =res.getString("comp_name");
+			comp.setCompName(cname);
+			System.out.println("name"+""+comp.getCompName());
+			String pass = res.getString("password");
+			comp.setPassword(pass);
+			String email = res.getString("email");
+			comp.setEmail(email);
+			
+			comp.setCoupons(null);
+			company.add(comp);
+
+		System.out.println("the search for  all company insystem succssfully");
 		}
-		else{
+	
+		if(company.size() ==0)
+		{
 			throw new companyException("no companys found  in system ");
 		}
 			
@@ -287,63 +282,132 @@ public class CompanyDBDA implements CompanyDAO{
 		PreparedStatement getcustCoupon = conn.prepareStatement(sqlQuery.companyQuerys.getCompanyCoupons);
 		getcustCoupon.setLong(1,this.getID(comp.getCompName()));	
 		ResultSet res = getcustCoupon.executeQuery();
-		if(res !=null)
+		
+		while(res.next())
 		{
-			while(res.next())
+			couponsId.add(res.getLong("COUP_ID"));
+		}
+		//System.out.println(couponsId  + "size"+couponsId.size());
+		for (int i = 0; i < couponsId.size(); i++) 
+		{
+			PreparedStatement  coupons = conn.prepareStatement(sqlQuery.couponQuerys.getCouponById);
+			coupons.setLong(1,couponsId.get(i));
+			System.out.println(couponsId.get(i));
+			ResultSet fcop = coupons.executeQuery();
+			
+			while(fcop.next())
 			{
-				couponsId.add(res.getLong("COUP_ID"));
+					Coupon coup = new Coupon();
+					long idc =fcop.getLong("ID");
+					System.out.println("couponId="+idc);
+					String ti = fcop.getString("title");
+					Date sd = fcop.getDate("startDate");
+					Date ed= fcop.getDate("endDate");
+					int am = fcop.getInt("amount");
+					String t= fcop.getString("type");
+					String ms = fcop.getString("message");
+					double pr = fcop.getDouble("price");
+					String img =fcop.getString("image");
+					coup.setId(idc);
+					coup.setTitle(ti);
+					coup.setStartDate(sd);
+					coup.setEndDate(ed);
+					coup.setAmount(am);
+					
+					coup.setCtyp(CouponType.findValue(t));
+					coup.setMessage(ms);
+					coup.setPrice(pr);
+					coup.setImage("img");
+					comp_coup.add(coup);
 			}
-			System.out.println(couponsId  + "size"+couponsId.size());
-			for (int i = 0; i < couponsId.size(); i++) 
-			{
-				PreparedStatement  coupons = conn.prepareStatement(sqlQuery.couponQuerys.getCouponById);
-				coupons.setLong(1,couponsId.get(i));
-				System.out.println(couponsId.get(i));
-				ResultSet fcop = coupons.executeQuery();
-				if(fcop !=null)
-				{
-					while(fcop.next())
-					{
-							Coupon coup = new Coupon();
-							long idc =fcop.getLong("ID");
-							System.out.println("couponId="+idc);
-							String ti = fcop.getString("title");
-							Date sd = fcop.getDate("startDate");
-							Date ed= fcop.getDate("endDate");
-							int am = fcop.getInt("amount");
-							String t= fcop.getString("type");
-							String ms = fcop.getString("message");
-							double pr = fcop.getDouble("price");
-							String img =fcop.getString("image");
-							coup.setId(idc);
-							coup.setTitle(ti);
-							coup.setStartDate(sd);
-							coup.setEndDate(ed);
-							coup.setAmount(am);
-							
-							coup.setCtyp(CouponType.findValue(t));
-							coup.setMessage(ms);
-							coup.setPrice(pr);
-							coup.setImage("img");
-							comp_coup.add(coup);
-					}
-					System.out.println("the Coupon found successfully");
-				}
-				else{
-					throw new companyException("error while tring  to add coupon");				}
 				
-			}
+		}
+		if(comp_coup.size()>0)
+		{
+			System.out.println("the coupons added to company"+" ");
 			System.out.println("add coupon to company"+comp.getCompName()+ "Succesfully");
 		}
-		else{
-			throw new companyException("cannot add Coupon to Company");
+		else
+		{
+			throw new companyException("error while tring  to add coupon");				
+			
 		}
-	
 
-		
 		conPool.returnConnection(conn);
 		return comp_coup;
 	}
+	/**
+	 * find Company Coupon by type of  coupon 
+	 */
+	@Override
+	public Collection<Coupon> getCouponsByType(CouponType typ ,Company comp) throws InterruptedException, SQLException, companyException
+	{
+		
+		
+		//Customer cust = new Customer();
+		ArrayList<Long>couponsId = new ArrayList<Long>();
+		
+		ArrayList<Coupon> comp_coup =new ArrayList<Coupon>();
+		
+		conn = conPool.getConnection();
+		PreparedStatement getcustCoupon = conn.prepareStatement(sqlQuery.companyQuerys.getCompanyCoupons);
+		getcustCoupon.setLong(1,this.getID(comp.getCompName()));	
+		ResultSet res = getcustCoupon.executeQuery();
+		
+		while(res.next())
+		{
+			couponsId.add(res.getLong("COUP_ID"));
+		}
+		//System.out.println(couponsId  + "size"+couponsId.size());
+		for (int i = 0; i < couponsId.size(); i++) 
+		{
+			PreparedStatement  coupons = conn.prepareStatement(sqlQuery.couponQuerys.getCouponByType);
+			coupons.setLong(1,couponsId.get(i));
+			System.out.println(couponsId.get(i));
+			ResultSet fcop = coupons.executeQuery();
+			
+			while(fcop.next())
+			{
+					Coupon coup = new Coupon();
+					long idc =fcop.getLong("ID");
+					System.out.println("couponId="+idc);
+					String ti = fcop.getString("title");
+					Date sd = fcop.getDate("startDate");
+					Date ed= fcop.getDate("endDate");
+					int am = fcop.getInt("amount");
+					String t= fcop.getString("type");
+					String ms = fcop.getString("message");
+					double pr = fcop.getDouble("price");
+					String img =fcop.getString("image");
+					coup.setId(idc);
+					coup.setTitle(ti);
+					coup.setStartDate(sd);
+					coup.setEndDate(ed);
+					coup.setAmount(am);
+					
+					coup.setCtyp(CouponType.findValue(t));
+					coup.setMessage(ms);
+					coup.setPrice(pr);
+					coup.setImage("img");
+					comp_coup.add(coup);
+			}
+				
+		}
+		if(comp_coup.size()>0)
+		{
+			System.out.println("the coupons added to company"+" ");
+			System.out.println("add coupon to company"+comp.getCompName()+ "Succesfully");
+		}
+		else
+		{
+			throw new companyException("error while tring  to add coupon");				
+			
+		}
+
+		conPool.returnConnection(conn);
+		return comp_coup;
+	}
+
 
 	/**
 	 * @throws companyException 
@@ -354,42 +418,41 @@ public class CompanyDBDA implements CompanyDAO{
 	 * @password
 	 * the company can get inside the system by using  login with user name  and  password
 	 */
+	
 	@Override
 	public boolean login(String compName, String password) throws companyException, InterruptedException, SQLException {
 		boolean exist = false;
 		String usr = "" ;
 		String pass = "";
-		//String login = "SELECT comp_name,password From company";
-		
-		
 		conn = conPool.getConnection();
-		//System.out.println(conn);
-		//PreparedStatement loginSt = con.prepareStatement(login);
-		Statement log = conn.createStatement();
-		ResultSet res = log.executeQuery(sqlQuery.companyQuerys.login);
-		if(res !=null)
+		PreparedStatement loginSt = conn.prepareStatement(sqlQuery.companyQuerys.login);
+		ResultSet res = loginSt.executeQuery();
+		System.out.println(compName.trim() +" "+ password.trim());
+		while(res.next())
 		{
-			while(res.next())
+			usr= res.getString(1);
+			System.out.println("the usr:"+usr);
+			pass = res.getString(2);
+			System.out.println("the pass:"+pass);
+			if(compName.equals(usr) && password.equals(pass))
 			{
-				usr= res.getString(1).trim();
-				pass = res.getString(2).trim();
-				if(compName.equals(usr.trim()) && password.equals(pass.trim()))
-				{
-					exist = true;
-					System.out.println("the user name and  password found in system");
-				}
-				else{
-					exist =false;
-					System.out.println("the User name or password Wromg  try again");
-					throw new companyException("one of  entries or both is wrong try contact to administrator");
-				}
+				exist = true;
+				System.out.println("the user name and  password found in system");
 			}
-			System.out.println("the Login successfully as Company");
+		
 		}
-		else
+		if(exist == false)
 		{
-			throw new companyException("Comapny login Fail ");
+			System.out.println("the User name or password wrong  try again");
+			throw new companyException("one of  entries or both is wrong try contact to administrator");
 		}
+		else{
+		System.out.println("the Login successfully as Company");
+		}
+	
+	
+		
+	
 
 		conPool.returnConnection(conn);
 		return exist;
@@ -403,28 +466,24 @@ public class CompanyDBDA implements CompanyDAO{
 	public long getID(String name) throws SQLException, InterruptedException, companyException
 	{
 		
-		int id = 0 ;
+		long id = 0 ;
 		
 		conn = conPool.getConnection();
 		
 		String sql = "SELECT ID From Company WHERE comp_name LIKE '%" +name +"%'";
-		
-		PreparedStatement st = conn.prepareStatement(sql);//sqlQuery.companyQuerys.findCompanyID);
-		//st.setString(1,name);
+		String sql2 ="SELECT * from Company WHERE comp_name =?";
+		PreparedStatement st = conn.prepareStatement(sql2);//sqlQuery.companyQuerys.findCompanyID);
+		st.setString(1,name);
 		ResultSet res = st.executeQuery();
 		
-		//if(res!=null)
-		//{
+		
+		
 		while(res.next())
 		{
-			id = res.getInt(1);
+			id = res.getLong("ID");
 			System.out.println("the  id  for this  company is  :"+" "+id);
 		}
-		//System.out.println("the Id found  for Company"+name);
-		//}
-		//else{
-		//	throw new companyException("Cannot found the id  for the Company in name "+name);
-		//}
+		
 		conPool.returnConnection(conn);
 		return id;
 			
@@ -435,32 +494,31 @@ public class CompanyDBDA implements CompanyDAO{
 	 * @throws InterruptedException 
 	 * @throws SQLException 
 	 * @throws companyException 
+	 * @throws ClassNotFoundException 
+	 * @throws CouponException 
 	 */
 	@Override
-	public  void  addCouponToCompany(Coupon c , Company com) throws InterruptedException, SQLException, companyException
+	public  void  addCouponToCompany(Coupon c , Company com) throws InterruptedException, SQLException, companyException, ClassNotFoundException, CouponException
 	{
 	   
 	        conn = conPool.getConnection();
+	        CouponDBDA coupdbda = new CouponDBDA();
 	       // String query = "INSERT INTO Customer_Coupon (CUST_ID, COUPON_ID) VALUES (?, ?)";
 	        PreparedStatement pstmt = conn.prepareStatement(sqlQuery.companyQuerys.createCompCouponT);
-	        if(pstmt.executeUpdate()>0)
-	        {
-	        	System.out.println("the company coupon table created");
-	        }
-	        else{
-	        	throw new companyException("the company Coupon table exist in system");
-	        }
+	        pstmt.executeUpdate();
+	      
 	        PreparedStatement insertCC = conn.prepareStatement(sqlQuery.companyQuerys.compCoupon);
-	        com.setId(this.getID(com.getCompName()));
-	        insertCC.setLong(1, com.getId());
-	        //c.setId(id);
+	        //com.setId(this.getID(com.getCompName()));
+	        insertCC.setLong(1, this.getID(com.getCompName()));
+	        c.setId(coupdbda.CouponId(c));
 	        insertCC.setLong(2, c.getId());
-	        if(insertCC.executeUpdate()>0)
+	        int addcc=insertCC.executeUpdate();
+	        if(addcc>0)
 	        {
 	        	System.out.println("the company id "+com.getId() +","+ "coupon id  "+c.getId() + "added successfully");
 	        }
 	        else{
-	        	throw new companyException("Cannot  add coupon company table");
+	        	throw new companyException("Cannot  add coupon to company  coupon table");
 	        }
 	        conPool.returnConnection(conn);
 	}

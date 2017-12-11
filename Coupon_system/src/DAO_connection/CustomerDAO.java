@@ -134,6 +134,8 @@ public interface CustomerDAO {
 	 * @throws CustomerException 
 	 */
 	Collection<Coupon> getAllCouponsByType(CouponType ctyp, Customer cust) throws InterruptedException, SQLException, CustomerException;
+	Collection<Coupon> getAllCoupons() throws SQLException, InterruptedException, CouponException, CustomerException, ClassNotFoundException;
+	//Collection<Coupon> getCouponById(long id);
 	
 
 }

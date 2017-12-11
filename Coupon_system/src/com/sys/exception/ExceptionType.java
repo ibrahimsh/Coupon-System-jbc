@@ -17,9 +17,14 @@ public enum ExceptionType {
 	WrongDataInputException,
 	NullConnectionException,
 	ParseException,
-	DuplicateCouponTypeException,
-	UnAvailableCouponException,
-	IllegalArgumentException;
+	companyException,
+	IllegalArgumentException,
+	CouponException,
+	CustomerEception,
+	MySQLSyntaxErrorException,
+	MySQLIntegrityConstraintViolationException,
+	CouponSystemException,
+	CustomerException;
 	
 
 }

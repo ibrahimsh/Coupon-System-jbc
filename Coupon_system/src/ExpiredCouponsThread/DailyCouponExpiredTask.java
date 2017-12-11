@@ -10,6 +10,7 @@ import java.util.Calendar;
 import java.util.Collection;
 
 import com.sys.exception.CouponException;
+import com.sys.exception.CouponSystemException;
 import com.sys.exception.CustomerException;
 
 import DAO_connection.CompanyDBDA;
@@ -28,75 +29,91 @@ public class DailyCouponExpiredTask implements Runnable {
 /**
  * {@link Method} run() use to enable  the process that clean system from expired coupons 
  */
-	private Collection<Coupon>getAllCoupons = new ArrayList<Coupon>();
-	private CouponDBDA coupondbda ;//= new CouponDBDA();
+	
+	private CouponDBDA coupondbda ;
 	//private Date today = (Date)Calendar.getInstance().getTime();
 	//java.sql.Date todayDate = java.sql.Date.valueOf(today);
-	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-	LocalDate localDate = LocalDate.now();
-	java.sql.Date todayDate = java.sql.Date.valueOf(localDate);
+	
 	private boolean is_quite =true;
 	/**
 	 * Constructor 
 	 * @throws SQLException 
 	 * @throws ClassNotFoundException 
 	 */
-	public DailyCouponExpiredTask() throws ClassNotFoundException, SQLException
+	public DailyCouponExpiredTask()
 	{
-		this.coupondbda = new CouponDBDA();
+		//this.coupondbda = new CouponDBDA();
 		
 	}
 	/**
 	 * Constructor - to  initialize  the  is  quite value  if  needed 
 	 * @param is_quite
 	 */
+	/*
 	public DailyCouponExpiredTask( boolean is_quite)
 	{
 		this.is_quite = is_quite;
-	}
+	}*/
 	/**
 	 * run the daily thread while its work for 24 hours every day  and  remove  the  expired coupons from system
+	 * @throws CouponException 
+	 * @throws SQLException 
+	 * @throws InterruptedException 
 	 */
+	public void coupons() throws InterruptedException, SQLException, CouponException
+	{
+		for(Coupon c : this.coupondbda.getAllCoupon())
+		{
+			System.out.println(c);
+		}
+	}
 	@Override
 	public void run() 
 	{
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+		LocalDate localDate = LocalDate.now();
+		java.sql.Date todayDate = java.sql.Date.valueOf(localDate);
 		
-		boolean is_quite =true;
-		while(!is_quite)
+		Collection<Coupon>getAllCoupons = new ArrayList<Coupon>();
+		System.out.println(todayDate);
+		System.out.println("start "+ is_quite);
+		
+			try {
+				coupondbda = new CouponDBDA();
+			} catch (ClassNotFoundException | SQLException e2) {
+				
+				e2.printStackTrace();
+				CouponSystemException.CouponExceptionHandler(e2);
+				
+			}
+	
+		while(is_quite)
 		{
 			
-			
 			try {
-				getAllCoupons = coupondbda.getAllCoupon();
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (CouponException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				getAllCoupons = this.coupondbda.getAllCoupon();
+			} catch (InterruptedException | SQLException | CouponException e1) {
+				
+				//e1.printStackTrace();
+				CouponSystemException.CouponExceptionHandler(e1);
 			}
 		
-		
-			
+			System.out.println(getAllCoupons);
 			for (Coupon coup : getAllCoupons)
 			{
+				System.out.println(coup);
+				System.out.println(coup.getEndDate());
 				if(todayDate.before(coup.getEndDate()))
 				{
-					try {
-						coupondbda.removeCoupon(coup);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (SQLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (CouponException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					
+						try {
+							coupondbda.removeCoupon(coup);
+						} catch (InterruptedException | SQLException | CouponException e) {
+							
+							//e.printStackTrace();
+							CouponSystemException.CouponExceptionHandler(e);
+						}
+				
 					
 				}
 				
@@ -108,6 +125,7 @@ public class DailyCouponExpiredTask implements Runnable {
 		} catch (InterruptedException e) {
 			
 			e.printStackTrace();
+			CouponSystemException.CouponExceptionHandler(e);
 		}
 		
 	}

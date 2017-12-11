@@ -111,10 +111,10 @@ public class CouponDBDA  implements CouponDAO{
 			{
 				System.out.println("the Coupon"+coup.getTitle() + "removed Successfully from Customer Coupon table");
 			}
-			else{
+			/*else{
 				System.out.println("the coupon dosent exist in customer Coupons");
 				throw new CouponException("the coupon dosent exist in customer Coupons");
-			}
+			}*/
 			PreparedStatement removeCouponCompany = conn.prepareStatement(sqlQuery.couponQuerys.removeCompcoupon);
 			removeCouponCompany.setLong(1, this.CouponId(coup));
 			if(removeCouponCompany.executeUpdate()>0)
@@ -146,10 +146,9 @@ public class CouponDBDA  implements CouponDAO{
 	 * @throws CouponException 
 	 */
 	@Override
-	public void updatecoupon(Coupon coup) throws InterruptedException, SQLException, CouponException {
-		
-		
-		
+	public void updatecoupon(Coupon coup) throws InterruptedException, SQLException, CouponException
+	{
+
 			conn = conPool.getConnection();
 			PreparedStatement update = conn.prepareStatement(sqlQuery.couponQuerys.updateCoupon);
 			if(coup.getTitle().length()>=1)
@@ -187,7 +186,7 @@ public class CouponDBDA  implements CouponDAO{
 				System.out.println("the update is  successfull enjoy");
 			}
 			else{
-				System.out.println("the coupon dosent exist in customer Coupons and cannot update it");
+				//System.out.println("the coupon dosent exist in customer Coupons and cannot update it");
 				throw new CouponException("the coupon dosent exist in customer Coupons cannot update it try with another Coupon or contact the admin");
 			}
 		
@@ -382,23 +381,26 @@ public class CouponDBDA  implements CouponDAO{
 	{
 		//Connection conn  = null ;
 		long id  = 0;
+
+		conn = conPool.getConnection();
+		PreparedStatement st = conn.prepareStatement(sqlQuery.couponQuerys.getCouponId);
+		st.setString(1,coup.getTitle());
+		ResultSet res = st.executeQuery();
 	
-			conn = conPool.getConnection();
-			PreparedStatement st = conn.prepareStatement(sqlQuery.couponQuerys.getCouponId);
-			st.setString(1,coup.getTitle());
-			ResultSet res = st.executeQuery();
-		if(res !=null)
+		while(res.next())
 		{
-			while(res.next())
-			{
-				id = res.getInt(1);
-				
-			}
-			System.out.println("the coupn id  is  found");
+			id = res.getInt(1);
+			
 		}
-		else{
+		if(id>0)
+		{
+			System.out.println("the coupn id  is  found");
+		}else
+		{
+	
 			throw new CouponException("No id  found or the the coupon dosent not exist ");
 		}
+	
 		conPool.returnConnection(conn);
 		return id;
 		

@@ -85,8 +85,8 @@ public class AdminFacade implements AdminFacadeDAO,CouponClientFacadeDAO
 			this._companydbda.removeCompany(comp);
 		}catch(Exception e)
 		{
-			//companyException.CompanyExceptionHandler(e);
-			e.getMessage();
+			companyException.CompanyExceptionHandler(e);
+			//e.getMessage();
 		}
 	
 		
@@ -108,7 +108,7 @@ public class AdminFacade implements AdminFacadeDAO,CouponClientFacadeDAO
 			this._companydbda.updateCompany(comp);
 		}catch(Exception e)
 		{
-			//companyException.CompanyExceptionHandler(e);
+			companyException.CompanyExceptionHandler(e);
 		//	e.getMessage();
 		}
 	
@@ -129,7 +129,7 @@ public class AdminFacade implements AdminFacadeDAO,CouponClientFacadeDAO
 			this.Comp = this._companydbda.getCompany(id);
 		}catch (Exception e)
 		{
-			//companyException.CompanyExceptionHandler(e);
+			companyException.CompanyExceptionHandler(e);
 		}
 		return this.Comp;
 	}
@@ -164,8 +164,8 @@ public class AdminFacade implements AdminFacadeDAO,CouponClientFacadeDAO
 			this._customerdbda.createCustomer(cust);
 		}catch (Exception e)
 		{
-			//CustomerException.CustomerExceptionHandler(e);
-			e.getMessage();
+			CustomerException.CustomerExceptionHandler(e);
+			//e.getMessage();
 		}
 	}
 /**
@@ -181,6 +181,7 @@ public class AdminFacade implements AdminFacadeDAO,CouponClientFacadeDAO
 				this._customerdbda.removeCustomer(cust);
 		}catch (Exception e)
 		{
+			e.printStackTrace();
 			CustomerException.CustomerExceptionHandler(e);
 		}
 	
@@ -216,6 +217,7 @@ public class AdminFacade implements AdminFacadeDAO,CouponClientFacadeDAO
 			this._customer =this._customerdbda.getCustomer(id);
 		}catch (Exception e)
 		{
+			e.printStackTrace();
 			CustomerException.CustomerExceptionHandler(e);
 		}
 		return this._customer;
@@ -264,10 +266,10 @@ public class AdminFacade implements AdminFacadeDAO,CouponClientFacadeDAO
 	 * @throws ClassNotFoundException 
 	 */
 	@Override
-	public boolean login(String UserName, String password, clientType clienttyp) throws ClassNotFoundException, SQLException 
+	public CouponClientFacadeDAO login(String UserName, String password, clientType clienttyp) throws ClassNotFoundException, SQLException 
 	{
 		boolean isAdmin = false;
-		AdminFacade adminfacade = null;
+		AdminFacade adminfacade = null ;
 		if(UserName.equals("admin") && password.equals("1234") && clienttyp.equals(clientType.ADMIN))
 		{
 			isAdmin = true;
@@ -278,7 +280,7 @@ public class AdminFacade implements AdminFacadeDAO,CouponClientFacadeDAO
 			isAdmin = false;
 			System.err.println("admin user name or  paswword wrong try agian or  change  to ADMIN mode");
 		}
-		return isAdmin;
+		return adminfacade;
 	}
 
 }
